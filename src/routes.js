@@ -18,6 +18,11 @@ const routes = (handler) => [
     method: 'PUT',
     path: '/books/{bookId}',
     handler: handler.editBookByIdHandler
+  },
+  {
+    method: 'DELETE',
+    path: '/books/{bookId}',
+    handler: handler.deleteBookByIdHandler
   }
 ]
 

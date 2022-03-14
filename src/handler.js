@@ -11,6 +11,7 @@ class Handler {
     this.getBooksHandler = this.getBooksHandler.bind(this)
     this.getBookByIdHandler = this.getBookByIdHandler.bind(this)
     this.editBookByIdHandler = this.editBookByIdHandler.bind(this)
+    this.deleteBookByIdHandler = this.deleteBookByIdHandler.bind(this)
   }
 
   addBookHandler (request, h) {
@@ -186,6 +187,41 @@ class Handler {
       })
       response.code(500)
       console.log(error.name)
+
+      return response
+    }
+  }
+
+  deleteBookByIdHandler (request, h) {
+    try {
+      const { bookId } = request.params
+
+      const foundBookIndex = this.data.findIndex((book) => book.id === bookId)
+      if (foundBookIndex === -1) throw new NotFoundError('BOOK_NOT_FOUND')
+
+      this.data.splice(foundBookIndex, 1)
+
+      return {
+        status: 'success',
+        message: 'Buku berhasil dihapus'
+      }
+    } catch (error) {
+      if (error.message === 'BOOK_NOT_FOUND') {
+        const response = h.response({
+          status: 'fail',
+          message: 'Buku gagal dihapus. Id tidak ditemukan'
+        })
+        response.code(error.code)
+
+        return response
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Terjadi kegagalan pada server kami'
+      })
+      response.code(500)
+      console.log(error)
 
       return response
     }
