@@ -76,12 +76,51 @@ class Handler {
     }
   }
 
-  getBooksHandler () {
-    return {
-      status: 'success',
-      data: {
-        books: mapBook(this.data)
+  getBooksHandler (request, h) {
+    try {
+      const { reading } = request.query
+
+      if (reading !== undefined) {
+        const isReading = Boolean(Number(reading))
+
+        const books = this.data.filter((book) => book.reading === isReading)
+
+        if (!books) throw new NotFoundError('BOOK_NOT_FOUND')
+
+        return {
+          status: 'success',
+          data: {
+            books: mapBook(books)
+          }
+        }
       }
+
+      /* ----------------------------- take all books ----------------------------- */
+      return {
+        status: 'success',
+        data: {
+          books: mapBook(this.data)
+        }
+      }
+    } catch (error) {
+      if (error.message === 'BOOK_NOT_FOUND') {
+        const response = h.response({
+          status: 'fail',
+          message: 'Tidak ditemukan Buku yang sedang dibaca'
+        })
+        response.code(error.code)
+
+        return response
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Terjadi kegagalan pada server kami'
+      })
+      response.code(500)
+      console.log(error)
+
+      return response
     }
   }
 
