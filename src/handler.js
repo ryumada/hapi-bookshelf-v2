@@ -20,7 +20,7 @@ class Handler {
 
       const id = this.nanoid(16)
       const finished = (pageCount === readPage)
-      const insertedAt = new Date().toISOString
+      const insertedAt = new Date().toISOString()
       const updatedAt = insertedAt
 
       const newBook = {
