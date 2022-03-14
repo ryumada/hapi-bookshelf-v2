@@ -1,4 +1,6 @@
 const ClientError = require('./errors/clientError')
+const NotFoundError = require('./errors/notFoundError')
+const mapBook = require('./tools/mapBook')
 
 class Handler {
   constructor ({ nanoid, data }) {
@@ -7,6 +9,7 @@ class Handler {
 
     this.addBookHandler = this.addBookHandler.bind(this)
     this.getBooksHandler = this.getBooksHandler.bind(this)
+    this.getBookByIdHandler = this.getBookByIdHandler.bind(this)
   }
 
   addBookHandler (request, h) {
@@ -54,6 +57,50 @@ class Handler {
         const response = h.response({
           status: 'fail',
           message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount'
+        })
+        response.code(error.code)
+
+        return response
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Terjadi kegagalan pada server kami'
+      })
+      response.code(500)
+      console.log(error.name)
+
+      return response
+    }
+  }
+
+  getBooksHandler () {
+    return {
+      status: 'success',
+      data: {
+        books: mapBook(this.data)
+      }
+    }
+  }
+
+  getBookByIdHandler (request, h) {
+    try {
+      const { bookId } = request.params
+      const book = this.data.filter((bookAttrib) => (bookAttrib.id === bookId))[0]
+
+      if (!book) throw new NotFoundError('BOOK_NOT_FOUND')
+
+      return {
+        status: 'success',
+        data: {
+          book: book
+        }
+      }
+    } catch (error) {
+      if (error.message === 'BOOK_NOT_FOUND') {
+        const response = h.response({
+          status: 'fail',
+          message: 'Buku tidak ditemukan'
         })
         response.code(error.code)
 
