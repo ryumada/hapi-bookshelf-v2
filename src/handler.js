@@ -78,19 +78,40 @@ class Handler {
 
   getBooksHandler (request, h) {
     try {
-      const { reading } = request.query
+      const { reading, finished, name } = request.query
+
+      let filteredBooks
 
       if (reading !== undefined) {
         const isReading = Boolean(Number(reading))
 
-        const books = this.data.filter((book) => book.reading === isReading)
+        filteredBooks = this.data.filter((book) => book.reading === isReading)
+      }
 
-        if (!books) throw new NotFoundError('BOOK_NOT_FOUND')
+      if (finished !== undefined) {
+        const isFinished = Boolean(Number(finished))
+
+        filteredBooks = this.data.filter((book) => book.finished === isFinished)
+      }
+
+      if (name !== undefined) {
+        const searchRegExp = new RegExp(name, 'i')
+        filteredBooks = []
+
+        this.data.forEach((foundBook) => {
+          if (foundBook.name.search(searchRegExp) !== -1) {
+            filteredBooks.push(foundBook)
+          }
+        })
+      }
+
+      if (reading !== undefined || finished !== undefined || name !== undefined) {
+        if (!filteredBooks || filteredBooks === []) throw new NotFoundError('BOOK_NOT_FOUND')
 
         return {
           status: 'success',
           data: {
-            books: mapBook(books)
+            books: mapBook(filteredBooks)
           }
         }
       }
