@@ -1,11 +1,12 @@
 const ClientError = require('./errors/clientError')
 
 class Handler {
-  constructor (dataHandler, nanoid) {
-    this.dataHandler = dataHandler
+  constructor ({ nanoid, data }) {
     this.nanoid = nanoid
+    this.data = data
 
     this.addBookHandler = this.addBookHandler.bind(this)
+    this.getBooksHandler = this.getBooksHandler.bind(this)
   }
 
   addBookHandler (request, h) {
@@ -26,7 +27,7 @@ class Handler {
         id, name, year, author, summary, publisher, pageCount, readPage, finished, reading, insertedAt, updatedAt
       }
 
-      this.dataHandler.addData(newBook)
+      this.data.push(newBook)
 
       const response = h.response({
         status: 'success',

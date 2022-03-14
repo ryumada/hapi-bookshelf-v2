@@ -1,8 +1,8 @@
 const { nanoid } = require('nanoid')
-const dataHandler = require('./data/dataHandler')
+const data = require('./data/books')
 
 const Handler = require('./handler')
-const handler = new Handler(dataHandler, nanoid)
+const handler = new Handler({ nanoid, data })
 
 const routes = require('./routes')
 
