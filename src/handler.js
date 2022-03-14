@@ -10,6 +10,7 @@ class Handler {
     this.addBookHandler = this.addBookHandler.bind(this)
     this.getBooksHandler = this.getBooksHandler.bind(this)
     this.getBookByIdHandler = this.getBookByIdHandler.bind(this)
+    this.editBookByIdHandler = this.editBookByIdHandler.bind(this)
   }
 
   addBookHandler (request, h) {
@@ -101,6 +102,78 @@ class Handler {
         const response = h.response({
           status: 'fail',
           message: 'Buku tidak ditemukan'
+        })
+        response.code(error.code)
+
+        return response
+      }
+
+      const response = h.response({
+        status: 'error',
+        message: 'Terjadi kegagalan pada server kami'
+      })
+      response.code(500)
+      console.log(error.name)
+
+      return response
+    }
+  }
+
+  editBookByIdHandler (request, h) {
+    try {
+      const { bookId } = request.params
+      const {
+        name, year, author, summary, publisher, pageCount, readPage, reading
+      } = request.payload
+
+      if (!name) throw new ClientError('NO_NAME_PROPERTY')
+      if (readPage > pageCount) throw new ClientError('READ_PAGE_CANNOT_MORE_THAN_PAGE_COUNT')
+
+      const foundBookIndex = this.data.findIndex((book) => book.id === bookId)
+      if (foundBookIndex === -1) throw new NotFoundError('BOOK_NOT_FOUND')
+
+      this.data[foundBookIndex] = {
+        ...this.data[foundBookIndex],
+        name,
+        year,
+        author,
+        summary,
+        publisher,
+        pageCount,
+        readPage,
+        reading,
+        updatedAt: new Date().toDateString()
+      }
+
+      return {
+        status: 'success',
+        message: 'Buku berhasil diperbarui'
+      }
+    } catch (error) {
+      if (error.message === 'NO_NAME_PROPERTY') {
+        const response = h.response({
+          status: 'fail',
+          message: 'Gagal memperbarui buku. Mohon isi nama buku'
+        })
+        response.code(error.code)
+
+        return response
+      }
+
+      if (error.message === 'READ_PAGE_CANNOT_MORE_THAN_PAGE_COUNT') {
+        const response = h.response({
+          status: 'fail',
+          message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount'
+        })
+        response.code(error.code)
+
+        return response
+      }
+
+      if (error.message === 'BOOK_NOT_FOUND') {
+        const response = h.response({
+          status: 'fail',
+          message: 'Gagal memperbarui buku. Id tidak ditemukan'
         })
         response.code(error.code)
 
